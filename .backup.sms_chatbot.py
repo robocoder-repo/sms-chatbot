@@ -1,9 +1,11 @@
 
-import gradio as gr
 import requests
+from flask import Flask, request, jsonify
 
 API_BASE_URL = 'https://api.httpsms.com/v1'
-API_KEY = 'VmM2kyFx0XGRklix4TnXb9GloZx-TQRPt82PdQ-9bKjAmJIdHXH4kr6HiKqvZSdS'
+API_KEY = 'YOUR_API_KEY_HERE'  # Replace with actual API key when available
+
+app = Flask(__name__)
 
 # In-memory storage for conversation history
 conversations = {}
@@ -41,32 +43,23 @@ def generate_response(message):
     # Simple response logic - can be expanded later
     return f"You said: {message}. How can I help you?"
 
-def chatbot(from_number, to_number, message):
+@app.route('/receive_sms', methods=['POST'])
+def receive_sms():
+    data = request.json
+    from_number = data['from']
+    to_number = data['to']
+    content = data['content']
+    
     # Store the message in conversation history
     if from_number not in conversations:
         conversations[from_number] = []
-    conversations[from_number].append({"from": from_number, "content": message})
+    conversations[from_number].append({"from": from_number, "content": content})
     
     # Generate and send response
-    response = generate_response(message)
-    send_result = send_sms(to_number, from_number, response)
+    response = generate_response(content)
+    send_sms(to_number, from_number, response)
     
-    # Return both the chatbot's response and the SMS sending result
-    return response, str(send_result)
+    return jsonify({"status": "success"}), 200
 
-iface = gr.Interface(
-    fn=chatbot,
-    inputs=[
-        gr.Textbox(label="From Number"),
-        gr.Textbox(label="To Number"),
-        gr.Textbox(label="Message")
-    ],
-    outputs=[
-        gr.Textbox(label="Chatbot Response"),
-        gr.Textbox(label="SMS Sending Result")
-    ],
-    title="SMS Chatbot",
-    description="Enter the 'from' number, 'to' number, and your message to interact with the SMS chatbot."
-)
-
-iface.launch()
+if __name__ == "__main__":
+    app.run(debug=True, port=5000)
