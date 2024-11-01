@@ -1,14 +1,9 @@
 
-
-# SMS Chatbot using Gradio and HTTP SMS API
 import gradio as gr
 import requests
 
 API_BASE_URL = 'https://api.httpsms.com/v1'
 API_KEY = 'VmM2kyFx0XGRklix4TnXb9GloZx-TQRPt82PdQ-9bKjAmJIdHXH4kr6HiKqvZSdS'
-
-# Rest of the code remains the same...
-
 
 # In-memory storage for conversation history
 conversations = {}
